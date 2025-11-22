@@ -93,9 +93,8 @@ Fast and scalable
 
 Works in real time
 
-📸 Demo (Optional)
-
-Include screenshots of:
+📸 Demo :
+https://youtu.be/Sd8TbF65H1o
 
 Webhook trigger
 
@@ -125,4 +124,4 @@ Feel free to open issues or submit pull requests.
 📬 Contact
 
 Created by Tanzeela Sharif
-For queries or collaboration: your email / LinkedIn link here
+For queries or collaboration: tanzeelasharif1@gmail.com 

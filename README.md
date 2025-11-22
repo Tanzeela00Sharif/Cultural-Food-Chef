@@ -59,7 +59,8 @@ The process is seamless and happens in real time.
    ├── workflow.json
    ├── README.md
    └── screenshots/
-        └── workflow-overview.png
+        └── <img width="905" height="362" alt="Screenshot 2025-11-22 131413" src="https://github.com/user-attachments/assets/3043feb9-cca6-416e-a8ec-fd58a08b2072" />
+
 
 🛠️ Technologies Used
 Tool	Purpose

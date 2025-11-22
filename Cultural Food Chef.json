@@ -1,0 +1,182 @@
+{
+  "name": "Cultural Food Chef",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        96
+      ],
+      "id": "1c00c7ab-7177-4ac7-a8ed-7da26c5ce31f",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "AixkPzAohNUk4m2K",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0ec5f902-9826-4674-a5ce-ca813b15888d",
+              "name": "prompt",
+              "value": "={{ $json.body.recipe_prompt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        -112
+      ],
+      "id": "bb2c3f56-59ce-4c1c-af12-44465b590756",
+      "name": "Extract only prompt"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=create the recipe of {{ $json.prompt }}",
+        "options": {
+          "systemMessage": "=You are a professional recipe generator.  \nGenerate a clear, simple, human-friendly recipe.  \nDo NOT use HTML, angle brackets, code blocks, or Markdown formatting.\n\nCreate the recipe for: {{ $json.recipe_name }}  \nCuisine / Country: {{ $json.country }}\n\nThe output must follow this exact structure:\n\n{{ $json.recipe_name }}\nCuisine: {{ $json.country }}\n\nIngredients:\n• List each ingredient clearly.\n• No numbering here, only bullet points.\n\nInstructions:\n1. Write each step in simple, short sentences.\n2. Steps must be numbered.\n3. No HTML tags, angle brackets, or special characters.\n4. Do not add symbols like ###, **, </p>, <br>, <li>, etc.\n\nNotes:\n• Keep the formatting readable.\n• Keep the language simple.\n• Return ONLY plain text.\n\nMake sure your final answer uses clean line breaks, with no \"\\n\", no escape characters, and no extra formatting.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        -112
+      ],
+      "id": "57d9b63c-102c-432a-9e5d-5177832700a1",
+      "name": "Recipe Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nlet text = $json.output || $json.recipe_text || \"\";\n\n// Remove HTML tags\ntext = text.replace(/<[^>]*>/g, \"\");\n\n// Fix escaped characters\ntext = text.replace(/\\\\n/g, \"\\n\");\ntext = text.replace(/\\\\t/g, \" \");\ntext = text.replace(/\\&nbsp;/g, \" \");\n\n// Remove double spaces\ntext = text.replace(/ +/g, \" \");\n\nreturn {\n  Recipe: text.trim()\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        -128
+      ],
+      "id": "2f972b81-f509-487f-a1f1-d88324d6ff9b",
+      "name": "Clean Genaterated Response"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d94ab284-82fc-418e-bafd-63f78b9edf24",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        -112
+      ],
+      "id": "901f998b-4d78-4cbb-8d24-d6cdff311a85",
+      "name": "Take quiry from website",
+      "webhookId": "d94ab284-82fc-418e-bafd-63f78b9edf24"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        768,
+        -128
+      ],
+      "id": "cccca7f8-56e5-4eb8-a3e1-de525e895563",
+      "name": "Respond to website"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Recipe Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract only prompt": {
+      "main": [
+        [
+          {
+            "node": "Recipe Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recipe Agent": {
+      "main": [
+        [
+          {
+            "node": "Clean Genaterated Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Genaterated Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Take quiry from website": {
+      "main": [
+        [
+          {
+            "node": "Extract only prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "449ced3f-65f7-4dd3-b584-e65f5b3b9ba2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a057eb7277bb3825978990a7f9e270aa0b880e8e0731e0bd10ecad5ccd8ae270"
+  },
+  "id": "usqOHjmK0qlSCpR7",
+  "tags": []
+}
